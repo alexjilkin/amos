@@ -14,7 +14,7 @@ def lehmer_code(perm):
         index += smaller * factorials[i]
         used[perm[i]] = True
 
-    return index
+    return code_to_bits(index)
 
 
 def code_to_bits(code, k):

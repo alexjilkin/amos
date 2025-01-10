@@ -3,10 +3,16 @@ import random
 from copy import deepcopy
 
 
-def get_amos(G: ig.Graph, A, amos, to=[]):
+def get_amos(G: ig.Graph, A, amos, to=[], membership=None):
+    if membership is None:
+        membership = {}
+        for i, subset in enumerate(A):
+            for w in subset:
+                membership[w] = i
+
     n = len(G.vs)
     if len(to) == n:
-        amos.append(to)
+        amos.append(to[:])
         return
 
     # Last not empty
@@ -17,26 +23,32 @@ def get_amos(G: ig.Graph, A, amos, to=[]):
     R = set()
 
     while True:
-        A[i] -= {x}
+        A[i].remove(x)
+        membership[x] = -1
         to.append(x)
         x_neighbors = set(G.neighbors(x))
         for w in x_neighbors - set(to):
-            j = next(i for i, s in enumerate(A) if w in s)
-            A[j] -= {w}
+            j = membership[w]
+
+            A[j].remove(w)
+            membership[w] = j + 1
 
             if j + 1 >= len(A) or not A[j + 1]:
                 A.append(set())
 
             A[j + 1].add(w)
 
-        get_amos(G, A, amos, to)
+        get_amos(G, A, amos, to, membership)
 
         for w in x_neighbors - set(to):
-            j = next(i for i, s in enumerate(A) if w in s)
-            A[j] -= {w}
+            j = membership[w]
+
+            A[j].remove(w)
+            membership[w] = j - 1
             A[j - 1].add(w)
 
         A[i].add(x)
+        membership[x] = i
         x = to.pop()
 
         if x == v:
