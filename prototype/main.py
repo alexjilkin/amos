@@ -57,7 +57,7 @@ def uccgs_iterative(k, G, vs, seen=set()):
                 G.delete_edges([(v, u)])
 
 
-k = 6
+k = 3
 G = Graph()
 G.add_vertices(k)
 vs = set()
@@ -71,10 +71,15 @@ print("Brute UCCGs:", len(uccgs), time.time() - start_time)
 #     # print(G.get_adjacency())
 start_time = time.time()
 all_amos = []
-for G in uccgs:
-    AMOs = []
-    get_amos(G, [set(v.index for v in G.vs)], AMOs)
-    all_amos.append(AMOs)
-    # print(*G.get_edgelist(), sep=", ")
-    # print(AMOs)
+G = uccgs[3]
+
+print(
+    "Edges:", ", ".join(f"({source}, {target})" for source, target in G.get_edgelist())
+)
+AMOs = []
+get_amos(G, [set(v.index for v in G.vs)], AMOs)
+# AMOs = [lehmer_code(AMO) for AMO in AMOs]
+print(AMOs)
+# all_amos.append(AMOs)
+
 print(f"Enumrated AMOs:", len(all_amos), time.time() - start_time)

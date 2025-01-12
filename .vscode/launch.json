@@ -6,8 +6,8 @@
       "type": "lldb",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/ajilkin/Documents/repos/amos",
-      "program": "/Users/ajilkin/Documents/repos/amos/build/Debug/outDebug"
+      "cwd": "/Users/ajilkin/Documents/repos/amos/src",
+      "program": "/Users/ajilkin/Documents/repos/amos/src/build/Debug/outDebug"
     }
   ]
 }
