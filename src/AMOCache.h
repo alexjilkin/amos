@@ -39,17 +39,15 @@ public:
 
         cout << "AMOs:\n";
         for (const auto &amo : amos) {
-          cout << "{ ";
-          for (int x : amo)
-            cout << x << " ";
-          cout << "}\n";
+          cout << amo << "\n";
         }
       }
     }
   }
 
 private:
-  using AmoList = vector<vector<int>>;
+  //AMO encoded to lehmer
+  using AmoList = vector<u_int16_t>;
 
   unordered_map<int, unordered_map<AdjMatrix, AmoList, AdjMatrixHash>>
       L; // L[k][G] stores AMOs for each graph G of size k
@@ -69,7 +67,7 @@ private:
         A[0].insert(i);
       }
 
-      vector<vector<int>> amos;
+      vector<u_int16_t> amos;
       vector<int> to;
 
       AMOs::generate(G, A, amos, to);

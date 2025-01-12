@@ -57,7 +57,7 @@ def uccgs_iterative(k, G, vs, seen=set()):
                 G.delete_edges([(v, u)])
 
 
-k = 4
+k = 3
 G = Graph()
 G.add_vertices(k)
 vs = set()
@@ -75,7 +75,7 @@ for G in uccgs:
 
     AMOs = []
     get_amos(G, [set(v.index for v in G.vs)], AMOs)
-    # AMOs = [lehmer_code(AMO) for AMO in AMOs]
+    AMOs = [lehmer_code(AMO) for AMO in AMOs]
     print(AMOs)
     # all_amos.append(AMOs)
 
