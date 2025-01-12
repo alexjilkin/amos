@@ -61,10 +61,10 @@ private:
       Graph &G = graphs[idx];
 
       // Prepare data structures for AMO generation
-      vector<set<int>> A;
-      A.push_back(set<int>()); // A[0] initially contains all vertices
+      vector<u_int16_t> A;
+      A.push_back(0); // A[0] initially contains all vertices
       for (int i = 0; i < G.n; ++i) {
-        A[0].insert(i);
+        A[0] |= (1 << i);
       }
 
       vector<u_int16_t> amos;

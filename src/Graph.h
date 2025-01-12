@@ -17,19 +17,24 @@ namespace amos {
  * - is_chordal() using Maximum Cardinality Search (MCS)
  */
 
-using AdjMatrix = vector<vector<bool>>;
+using AdjMatrix = vector<std::bitset<8>>;
 
 struct Graph {
   int n;
   AdjMatrix adj;
 
-  Graph(int n) : n(n), adj(n, vector<bool>(n, 0)) {}
+  Graph(int n) : n(n), adj(n) {
+    if (n > 8) {
+      throw std::invalid_argument(
+          "Graph size exceeds 8 vertices; adjust bitset size if needed.");
+    }
+  }
 
-  set<int> get_neighbors(int u) const {
-    set<int> neighbors;
+  vector<int> get_neighbors(int u) const {
+    vector<int> neighbors;
     for (int v = 0; v < n; v++) {
-      if (adj[u][v]) { 
-        neighbors.insert(v);
+      if (adj[u][v]) {
+        neighbors.push_back(v);
       }
     }
     return neighbors;
@@ -86,11 +91,10 @@ struct Graph {
   // Check if the graph is chordal using Maximum Cardinality Search (MCS).
   // If MCS yields a valid perfect elimination ordering, the graph is chordal.
   bool is_chordal() const {
-    vector<int> weight(n, 0);      // MCS weights
-    vector<bool> chosen(n, false); // Track if vertex is chosen
-    vector<int> peo(n, -1);        // Perfect elimination order
+    vector<int> weight(n, 0);
+    vector<bool> chosen(n, false);
+    vector<int> peo(n, -1);
 
-    // Maximum Cardinality Search (MCS)
     for (int step = n - 1; step >= 0; step--) {
       int maxW = -1, v = -1;
       for (int i = 0; i < n; i++) {
@@ -100,19 +104,18 @@ struct Graph {
         }
       }
       if (v == -1)
-        return false; // No vertex found
+        return false;
 
       peo[step] = v;
       chosen[v] = true;
 
       for (int w = 0; w < n; w++) {
-        if (edge_exist(v, w) && !chosen[w]) {
+        if (adj[v][w] && !chosen[w]) {
           weight[w]++;
         }
       }
     }
 
-    // Verify Perfect Elimination Order (PEO)
     vector<int> posInOrder(n);
     for (int i = 0; i < n; i++) {
       posInOrder[peo[i]] = i;
@@ -122,15 +125,14 @@ struct Graph {
       int v = peo[i];
       vector<int> higherNeighbors;
       for (int w = 0; w < n; w++) {
-        if (edge_exist(v, w) && posInOrder[w] > i) {
+        if (adj[v][w] && posInOrder[w] > i) {
           higherNeighbors.push_back(w);
         }
       }
 
-      std::set<int> higherSet(higherNeighbors.begin(), higherNeighbors.end());
-      for (int a : higherNeighbors) {
-        for (int b : higherNeighbors) {
-          if (a != b && higherSet.find(b) == higherSet.end()) {
+      for (size_t a = 0; a < higherNeighbors.size(); a++) {
+        for (size_t b = a + 1; b < higherNeighbors.size(); b++) {
+          if (!adj[higherNeighbors[a]][higherNeighbors[b]]) {
             return false;
           }
         }
@@ -144,16 +146,14 @@ private:
 };
 
 struct AdjMatrixHash {
-  size_t operator()(const AdjMatrix &vec) const {
-    std::hash<int> hasher;
+  size_t operator()(const AdjMatrix &matrix) const {
     size_t seed = 0;
 
-    // Iterate over each row in the 2D vector
-    for (const auto &row : vec) {
-      for (int value : row) {
-        // Combine the hash of each element
-        seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-      }
+    // Hash each row (bitset) in the matrix
+    for (const auto &row : matrix) {
+      // Convert the bitset to its integer representation and hash it
+      seed ^= std::hash<std::bitset<8>>{}(row) + 0x9e3779b9 + (seed << 6) +
+              (seed >> 2);
     }
 
     return seed;

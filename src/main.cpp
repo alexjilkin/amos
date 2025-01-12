@@ -12,11 +12,11 @@ using namespace amos;
 
 
 int main() {
-  int k = 3;
+  int k = 7;
 
   AmoCache cache(k);
 
-  cache.print_all();
+  // cache.print_all();
 
   std::cout << "Done!";
   return 0;

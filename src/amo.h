@@ -1,104 +1,110 @@
 #pragma once
 
 #include "Graph.h"
+#include "LehmerCode.h"
 #include <algorithm>
 #include <iostream>
-#include <set>
 #include <stack>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace amos {
 class AMOs {
 public:
-  static void generate(const Graph &G, std::vector<std::set<int>> &A,
+  static void generate(const Graph &G, std::vector<u_int16_t> &A,
                        std::vector<u_int16_t> &amos,
                        std::vector<int> to = {},
                        std::vector<int> membership = {}) {
     if (membership.empty()) {
-      membership.resize(G.n + 1000, -1);
-      for (size_t i = 0; i < A.size(); ++i) {
-        for (int w : A[i]) {
-          membership[w] = i;
+      membership.resize(G.n, -1);
+      for (int i = 0; i < A.size(); ++i) {
+        for (int w = 0; w < G.n; ++w) {
+          if (A[i] & (1 << w)) { // Check if w is in the subset
+            membership[w] = i;
+          }
         }
       }
     }
 
     int n = G.n;
     if (to.size() == n) {
-      amos.push_back(lehmer_code(to));
+      amos.push_back(LehmerCoder::encode(to));
       return;
     }
 
     // Find the last non-empty subset in A
     int i = A.size() - 1;
-    while (i >= 0 && A[i].empty()) {
+    while (i >= 0 && A[i] == 0) {
       --i;
     }
 
     if (i < 0)
       return; // No valid subsets left
 
-    int v = *A[i].begin();
+    int v = __builtin_ctz(A[i]); // Find the first set bit (smallest element in A[i])
     int x = v;
-    std::set<int> R;
+    u_int16_t R = 0;
 
     while (true) {
-      A[i].erase(x);
+      A[i] &= ~(1 << x); // Remove x from A[i]
       membership[x] = -1;
       to.push_back(x);
 
+      std::unordered_set<int> to_set(to.begin(), to.end());
       // Update neighbors of x
-      std::set<int> x_neighbors = G.get_neighbors(x);
+      std::vector<int> x_neighbors = G.get_neighbors(x);
       for (int w : x_neighbors) {
-        if (std::find(to.begin(), to.end(), w) != to.end())
+        if (to_set.count(w))
           continue;
 
         int j = membership[w];
-        A[j].erase(w);
+        A[j] &= ~(1 << w); // Remove w from A[j]
         membership[w] = j + 1;
 
-        if (j + 1 >= static_cast<int>(A.size()) || A[j + 1].empty()) {
-          A.push_back(set<int>());
+        if (j + 1 >= static_cast<int>(A.size()) || A[j + 1] == 0) {
+          A.push_back(0);
         }
 
-        A[j + 1].insert(w);
+        A[j + 1] |= (1 << w); // Add w to A[j + 1]
       }
 
       generate(G, A, amos, to, membership);
 
+      to_set.clear();                // Clear the set
+      to_set.insert(to.begin(), to.end());
       // Revert changes for neighbors of x
       for (int w : x_neighbors) {
-        if (std::find(to.begin(), to.end(), w) != to.end())
+        if (to_set.count(w))
           continue;
 
         int j = membership[w];
-        A[j].erase(w);
+        A[j] &= ~(1 << w);       // Remove w from A[j]
         membership[w] = j - 1;
-        A[j - 1].insert(w);
+        A[j - 1] |= (1 << w); // Add w back to A[j - 1]
       }
 
-      A[i].insert(x);
+      A[i] |= (1 << x); // Add x back to A[i]
       membership[x] = i;
       to.pop_back();
 
       if (x == v) {
         R = reachable_in_subset(G, v, A[i]);
-        R.erase(v);
+        R &= ~(1 << v); // Remove v from the subset
       }
 
-      if (R.empty())
+      if (R == 0)
         break;
-      x = *R.begin();
-      R.erase(R.begin());
+      x = __builtin_ctz(R); // Get the next smallest element in R
+      R &= ~(1 << x);       // Remove x from R
     }
   }
 
 private:
-  static std::set<int> reachable_in_subset(const Graph &G, int v,
-                                           const std::set<int> &subset) {
+  // Compute reachable vertices in a subset
+  static u_int16_t reachable_in_subset(const Graph &G, int v, u_int16_t subset) {
     const auto &adj = G.adj;
-    std::set<int> visited;
+    u_int16_t visited = 0;
     std::stack<int> stack;
     stack.push(v);
 
@@ -106,60 +112,19 @@ private:
       int current = stack.top();
       stack.pop();
 
-      if (visited.count(current))
+      if (visited & (1 << current))
         continue;
-      visited.insert(current);
+      visited |= (1 << current); // Mark current as visited
 
-      // Iterate over all potential neighbors
-      for (int neighbor = 0; neighbor < adj[current].size(); ++neighbor) {
-        if (adj[current][neighbor] && subset.count(neighbor) &&
-            !visited.count(neighbor)) {
+      for (int neighbor = 0; neighbor < G.n; ++neighbor) {
+        if ((adj[current][neighbor]) && (subset & (1 << neighbor)) &&
+            !(visited & (1 << neighbor))) {
           stack.push(neighbor);
         }
       }
     }
 
     return visited;
-  }
-
-  int factorial(int n) {
-    int result = 1;
-    for (int i = 2; i <= n; ++i) {
-      result *= i;
-    }
-    return result;
-  }
-
-  // Compute the lexicographic index (Lehmer code) of a permutation
-  static uint16_t lehmer_code(const std::vector<int> &perm) {
-    int n = perm.size();
-    uint16_t index = 0;
-
-    // Compute factorials in reverse order
-    std::vector<int> factorials(n);
-    factorials[n - 1] = 1;
-    for (int i = n - 2; i >= 0; --i) {
-      factorials[i] = factorials[i + 1] * (n - 1 - i);
-    }
-
-    // Track used elements
-    std::vector<bool> used(n, false);
-
-    for (int i = 0; i < n; ++i) {
-      int smaller = 0;
-
-      // Count smaller unused elements
-      for (int j = 0; j < perm[i]; ++j) {
-        if (!used[j]) {
-          ++smaller;
-        }
-      }
-
-      index += smaller * factorials[i];
-      used[perm[i]] = true;
-    }
-
-    return index;
   }
 };
 } // namespace amos
