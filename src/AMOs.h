@@ -29,7 +29,7 @@ public:
 
     int n = G.n;
     if (to.size() == n) {
-      amos.push_back(LehmerCoder::encode(to));
+      amos.push_back(LehmerCode::encode(to));
       return;
     }
 

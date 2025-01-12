@@ -1,25 +1,47 @@
 #pragma once
 
+#include "AMOs.h"
 #include "Graph.h"
-#include "amo.h"
-#include "uccg.h"
+#include "UCCG.h"
 #include <iostream>
 #include <map>
 #include <set>
 #include <vector>
 using namespace std;
 
+using GraphKey = u_int16_t;
+
 namespace amos {
+
+using AmoList = vector<u_int16_t>;
 
 class AmoCache {
 public:
   AmoCache(int max_k) {
-    for (int k = 3; k <= max_k; ++k) {
+    for (int k = 2; k <= max_k; ++k) {
+      std::cout << "Generating AMOs for k = " << k << "..." << std::endl;
       generate_for_k(k);
     }
+    std::cout << "AMO generation completed for all k up to " << max_k << "."
+              << std::endl;
   }
 
-  void print_all() const {
+  static void print_upper_triangle(GraphKey compressed, int n) {
+    int bit_position = 0;
+    for (int i = 0; i < n; ++i) {
+      for (int j = 0; j < n; ++j) {
+        if (j > i) {
+          std::cout << ((compressed & (1 << bit_position)) ? "1 " : "0 ");
+          ++bit_position;
+        } else {
+          // Print 0 for lower triangle and diagonal
+          std::cout << "0 ";
+        }
+      }
+      std::cout << std::endl;
+    }
+  }
+  void print() const {
     for (const auto &level : L) {
       int k = level.first;
       cout << "k = " << k << ":\n";
@@ -28,14 +50,7 @@ public:
         auto &G = entry.first;
         auto &amos = entry.second;
 
-        for (int x = 0; x < k; x++) {
-          cout << "[";
-          for (int y = 0; y < k; y++) {
-            cout << G[x][y] << ", ";
-          }
-
-          cout << "]" << "\n";
-        }
+        print_upper_triangle(G, k);
 
         cout << "AMOs:\n";
         for (const auto &amo : amos) {
@@ -45,17 +60,17 @@ public:
     }
   }
 
-private:
-  //AMO encoded to lehmer
-  using AmoList = vector<u_int16_t>;
+  AmoList get_amos(int k, GraphKey key) { return L[k][key]; }
 
-  unordered_map<int, unordered_map<AdjMatrix, AmoList, AdjMatrixHash>>
+private:
+  // AMO encoded to lehmer
+  unordered_map<int, unordered_map<GraphKey, AmoList>>
       L; // L[k][G] stores AMOs for each graph G of size k
 
   void generate_for_k(int k) {
-    auto graphs = UCCGBrute::generate(k); // Generate UCCGs for k
+    auto graphs = UCCG::generate(k); // Generate UCCGs for k
 
-    unordered_map<AdjMatrix, AmoList, AdjMatrixHash> graph_to_amos;
+    unordered_map<GraphKey, AmoList> graph_to_amos;
 
     for (size_t idx = 0; idx < graphs.size(); ++idx) {
       Graph &G = graphs[idx];
@@ -73,8 +88,8 @@ private:
       AMOs::generate(G, A, amos, to);
 
       // Store the AMOs for the current graph
-      auto adj_matrix = G.adj;
-      graph_to_amos[adj_matrix] = std::move(amos);
+      u_int16_t upper_triangle = G.get_upper_triangle();
+      graph_to_amos[upper_triangle] = std::move(amos);
     }
 
     // Store the results for this value of k

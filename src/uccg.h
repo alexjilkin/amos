@@ -14,7 +14,7 @@ namespace amos {
 /**
  *  Get all UCCGs of size k in a brute force method
  */
-class UCCGBrute {
+class UCCG {
 public:
   static vector<Graph> generate(int k) {
     vector<Graph> result;
