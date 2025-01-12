@@ -9,9 +9,9 @@ namespace amos {
 class LehmerCode {
 public:
   // Encode: Compute the lexicographic index (Lehmer code) of a permutation
-  static uint16_t encode(const std::vector<int> &perm) {
+  static uint8_t encode(const std::vector<int> &perm) {
     int n = perm.size();
-    uint16_t index = 0;
+    uint8_t index = 0;
 
     // Compute factorials in reverse order
     std::vector<int> factorials = compute_factorials(n);
@@ -37,11 +37,7 @@ public:
   }
 
   // Decode: Reconstruct a permutation from its Lehmer code
-  static std::vector<int> decode(uint16_t code, int n) {
-    if (n < 1 || factorial(n) > 65535) {
-      throw std::invalid_argument("Permutation size exceeds uint16_t range.");
-    }
-
+  static std::vector<int> decode(uint8_t code, int n) {
     // Compute factorials in reverse order
     std::vector<int> factorials = compute_factorials(n);
 

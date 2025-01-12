@@ -10,12 +10,12 @@
 using namespace amos;
 
 int main() {
-  int k = 3;
+  int k = 4;
 
   // Creates AMO Cache up to k vertices
   AmoCache cache(k);
 
-  u_int16_t upper_triangle = 0b11;
+  u_int16_t upper_triangle = 0b110010;
 
   AmoList amos = cache.get_amos(k, upper_triangle);
 

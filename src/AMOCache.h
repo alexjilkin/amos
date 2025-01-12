@@ -27,20 +27,23 @@ public:
   }
 
   static void print_upper_triangle(GraphKey compressed, int n) {
-    int bit_position = 0;
+    int total_bits = (n * (n - 1)) / 2; 
+    int bit_position = total_bits - 1;  
+
     for (int i = 0; i < n; ++i) {
       for (int j = 0; j < n; ++j) {
         if (j > i) {
           std::cout << ((compressed & (1 << bit_position)) ? "1 " : "0 ");
-          ++bit_position;
+          --bit_position; // Move to the next bit (from left-to-right
+                          // perspective)
         } else {
-          // Print 0 for lower triangle and diagonal
           std::cout << "0 ";
         }
       }
       std::cout << std::endl;
     }
   }
+
   void print() const {
     for (const auto &level : L) {
       int k = level.first;

@@ -57,7 +57,7 @@ def uccgs_iterative(k, G, vs, seen=set()):
                 G.delete_edges([(v, u)])
 
 
-k = 3
+k = 4
 G = Graph()
 G.add_vertices(k)
 vs = set()
