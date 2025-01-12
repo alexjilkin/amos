@@ -28,9 +28,9 @@ public:
         auto &G = entry.first;
         auto &amos = entry.second;
 
-        for (int x = 0; x < 3; x++) {
+        for (int x = 0; x < k; x++) {
           cout << "[";
-          for (int y = 0; y < 3; y++) {
+          for (int y = 0; y < k; y++) {
             cout << G[x][y] << ", ";
           }
 
@@ -76,11 +76,11 @@ private:
 
       // Store the AMOs for the current graph
       auto adj_matrix = G.adj;
-      graph_to_amos[adj_matrix] = move(amos);
+      graph_to_amos[adj_matrix] = std::move(amos);
     }
 
     // Store the results for this value of k
-    L[k] = move(graph_to_amos);
+    L[k] = std::move(graph_to_amos);
   }
 };
 } // namespace amos
