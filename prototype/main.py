@@ -67,8 +67,8 @@ start_time = time.time()
 uccgs = uccgs_brute(k)
 print("Brute UCCGs:", len(uccgs), time.time() - start_time)
 
-# for G in uccgs:
-#     # print(G.get_adjacency())
+for G in uccgs:
+    print(G.get_adjacency())
 start_time = time.time()
 all_amos = []
 G = uccgs[3]

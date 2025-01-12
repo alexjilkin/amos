@@ -13,7 +13,7 @@ namespace amos {
 class AmoCache {
 public:
   AmoCache(int max_k) {
-    for (int k = 2; k <= max_k; ++k) {
+    for (int k = 3; k <= max_k; ++k) {
       generate_for_k(k);
     }
   }
@@ -55,30 +55,32 @@ private:
 
   void generate_for_k(int k) {
     auto graphs = UCCGBrute::generate(k); // Generate UCCGs for k
-    std::unordered_map<AdjMatrix, AmoList, AdjMatrixHash> graph_to_amos;
 
-    for (size_t idx = 0; idx < graphs.size(); ++idx) {
-      Graph &G = graphs[idx];
 
-      // Prepare data structures for AMO generation
-      std::vector<std::set<int>> A;
-      A.push_back(std::set<int>()); // A[0] initially contains all vertices
-      for (int i = 0; i < G.n; ++i) {
-        A[0].insert(i);
-      }
+    // std::unordered_map<AdjMatrix, AmoList, AdjMatrixHash> graph_to_amos;
 
-      std::vector<std::vector<int>> amos;
-      std::vector<int> to;
+    // for (size_t idx = 0; idx < graphs.size(); ++idx) {
+    //   Graph &G = graphs[idx];
 
-      AMOs::generate(G, A, amos, to);
+    //   // Prepare data structures for AMO generation
+    //   std::vector<std::set<int>> A;
+    //   A.push_back(std::set<int>()); // A[0] initially contains all vertices
+    //   for (int i = 0; i < G.n; ++i) {
+    //     A[0].insert(i);
+    //   }
 
-      // Store the AMOs for the current graph
-      auto adj_matrix = G.adj;
-      graph_to_amos[adj_matrix] = std::move(amos);
-    }
+    //   std::vector<std::vector<int>> amos;
+    //   std::vector<int> to;
+
+    //   AMOs::generate(G, A, amos, to);
+
+    //   // Store the AMOs for the current graph
+    //   auto adj_matrix = G.adj;
+    //   graph_to_amos[adj_matrix] = std::move(amos);
+    // }
 
     // Store the results for this value of k
-    L[k] = std::move(graph_to_amos);
+    // L[k] = std::move(graph_to_amos);
   }
 };
 } // namespace amos

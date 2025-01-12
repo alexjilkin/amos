@@ -32,7 +32,7 @@ struct Graph {
 
   void add_edge(int u, int v) {
     adj[u][v] = true;
-    adj[v][u] = false;
+    adj[v][u] = true;
   }
 
   // Remove an undirected edge (u, v)
@@ -41,8 +41,7 @@ struct Graph {
     adj[v][u] = false;
   }
 
-  // Check if two vertices are directly connected
-  bool are_connected(int u, int v) const { return adj[u][v] == true; }
+  bool edge_exist(int u, int v) const { return adj[u][v] == true; }
 
   // Check if the graph is connected via BFS/DFS
   bool is_connected() const {
@@ -79,17 +78,15 @@ struct Graph {
     return (countVisit == n);
   }
 
+  // Check if the graph is chordal using Maximum Cardinality Search (MCS).
+  // If MCS yields a valid perfect elimination ordering, the graph is chordal.
   bool is_chordal() const {
-    // MCS uses a "weight" array to pick the next vertex with the highest weight
-    // that is not yet chosen.
-    // Then we produce an ordering and verify if it is indeed a PEO.
-
     vector<int> weight(n, 0);      // MCS weights
-    vector<bool> chosen(n, false); // track if vertex is chosen
-    vector<int> peo(n, -1); // will store the order (perfect elimination order)
+    vector<bool> chosen(n, false); // Track if vertex is chosen
+    vector<int> peo(n, -1);        // Perfect elimination order
 
+    // Maximum Cardinality Search (MCS)
     for (int step = n - 1; step >= 0; step--) {
-      // pick an unchosen vertex of maximum weight
       int maxW = -1, v = -1;
       for (int i = 0; i < n; i++) {
         if (!chosen[i] && weight[i] > maxW) {
@@ -97,50 +94,38 @@ struct Graph {
           v = i;
         }
       }
-      if (v == -1) {
-        // no vertex found (shouldn't happen if the graph is connected or if we
-        // handle all vertices)
-        return false;
-      }
+      if (v == -1)
+        return false; // No vertex found
 
-      // place v in position 'step' of the ordering
       peo[step] = v;
       chosen[v] = true;
 
-      // increment weight of neighbors of v that are not chosen
       for (int w = 0; w < n; w++) {
-        if (adj[v][w] &&
-            !chosen[w]) { // Check adjacency and whether the vertex is chosen
+        if (edge_exist(v, w) && !chosen[w]) {
           weight[w]++;
         }
       }
     }
 
-    // 'peo' is the reverse MCS order (the last picked is at peo[n-1])
-    // But MCS doesn't guarantee the order is PEO automatically. We must verify.
-
-    // Check if each vertex has a clique among its higher-index neighbors in
-    // 'peo'.
+    // Verify Perfect Elimination Order (PEO)
     vector<int> posInOrder(n);
     for (int i = 0; i < n; i++) {
       posInOrder[peo[i]] = i;
     }
 
-    // for each vertex in peo (in order: peo[0], peo[1], ... peo[n-1])
     for (int i = 0; i < n; i++) {
       int v = peo[i];
-      // collect neighbors of v that appear after v in peo
       vector<int> higherNeighbors;
       for (int w = 0; w < n; w++) {
-        if (adj[v][w] && posInOrder[w] > i) {
+        if (edge_exist(v, w) && posInOrder[w] > i) {
           higherNeighbors.push_back(w);
         }
       }
-      // they must form a clique
-      // Check if each pair of higherNeighbors are directly connected
-      for (int a = 0; a < (int)higherNeighbors.size(); a++) {
-        for (int b = a + 1; b < (int)higherNeighbors.size(); b++) {
-          if (!adj[higherNeighbors[a]][higherNeighbors[b]]) {
+
+      std::set<int> higherSet(higherNeighbors.begin(), higherNeighbors.end());
+      for (int a : higherNeighbors) {
+        for (int b : higherNeighbors) {
+          if (a != b && higherSet.find(b) == higherSet.end()) {
             return false;
           }
         }
@@ -154,13 +139,13 @@ private:
 };
 
 struct AdjMatrixHash {
-  size_t operator()(const vector<vector<bool>> &vec) const {
-    std::hash<bool> hasher;
+  size_t operator()(const AdjMatrix &vec) const {
+    std::hash<int> hasher;
     size_t seed = 0;
 
-    // Iterate over each row in the 2D boolean vector
+    // Iterate over each row in the 2D vector
     for (const auto &row : vec) {
-      for (bool value : row) {
+      for (int value : row) {
         // Combine the hash of each element
         seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
       }
