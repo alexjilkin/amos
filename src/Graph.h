@@ -25,9 +25,14 @@ struct Graph {
 
   Graph(int n) : n(n), adj(n, vector<bool>(n, 0)) {}
 
-  // Get neighbors of a vertex
   set<int> get_neighbors(int u) const {
-    return set<int>(adj[u].begin(), adj[u].end());
+    set<int> neighbors;
+    for (int v = 0; v < n; v++) {
+      if (adj[u][v]) { 
+        neighbors.insert(v);
+      }
+    }
+    return neighbors;
   }
 
   void add_edge(int u, int v) {
