@@ -42,13 +42,15 @@ If the input adjacency matrix represents:
 ```
 The program will output:
 ```
+Adjacency matrix: 
 0 1 1 
 0 0 0 
 0 0 0 
+
 AMOs:
-0
-2
-4
+Lehmer code: 0, permutation: [0, 1, 2]
+Lehmer code: 2, permutation: [1, 0, 2]
+Lehmer code: 4, permutation: [2, 0, 1]
 ...
 ```
 
