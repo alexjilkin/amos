@@ -12,7 +12,7 @@ using namespace amos;
 
 
 int main() {
-  int k = 4;
+  int k = 3;
 
   AmoCache cache(k);
 
