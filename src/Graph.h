@@ -141,7 +141,7 @@ struct Graph {
 
     return true;
   }
-  // Method to compress the upper triangular matrix into a u_int16
+  // Compress the upper triangular matrix into a u_int16
   u_int16_t get_upper_triangle() const {
     u_int16_t compressed = 0;
     int total_bits =
@@ -152,9 +152,9 @@ struct Graph {
     for (int i = 0; i < n; ++i) {
       for (int j = i + 1; j < n; ++j) {
         if (adj[i][j]) {
-          compressed |= (1 << bit_position); // Set the bit from left to right
+          compressed |= (1 << bit_position);
         }
-        --bit_position; // Move to the next bit
+        --bit_position; 
       }
     }
 

@@ -35,8 +35,7 @@ public:
       for (int j = 0; j < n; ++j) {
         if (j > i) {
           std::cout << ((compressed & (1 << bit_position)) ? "1 " : "0 ");
-          --bit_position; // Move to the next bit (from left-to-right
-                          // perspective)
+          --bit_position;
         } else {
           std::cout << "0 ";
         }
@@ -53,10 +52,10 @@ public:
         auto &amos = L[k][G]; // Access the AmoList at index G
 
         if (amos.empty())
-          continue; // Skip if the AmoList is empty
+          continue;
 
         print_upper_triangle(
-            G, k); // Use G as the GraphKey and k as the size parameter
+            G, k); 
 
         std::cout << "AMOs:\n";
         for (const auto &amo : amos) {

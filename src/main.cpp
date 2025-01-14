@@ -11,7 +11,7 @@
 using namespace amos;
 
 int main() {
-  int k = 7;
+  int k = 6;
 
   auto start = std::chrono::high_resolution_clock::now();
 
