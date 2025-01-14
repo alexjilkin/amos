@@ -7,6 +7,7 @@
 #include <queue>
 #include <utility>
 #include <vector>
+#include <chrono>
 
 using namespace std;
 
@@ -17,6 +18,8 @@ namespace amos {
 class UCCG {
 public:
   static vector<Graph> generate(int k) {
+    // auto start = chrono::high_resolution_clock::now();
+
     vector<Graph> result;
 
     // 1) List all possible edges among k vertices
@@ -38,6 +41,10 @@ public:
       generate_combinations(allEdges, 0, r, combination, result, k);
     }
 
+    // auto duration = chrono::duration_cast<chrono::milliseconds>(
+    //   chrono::high_resolution_clock::now() - start);
+
+    // std::cout << "For k=" << k << " There are " << result.size() << " UCCGs and It took " << duration.count() << "ms\n";
     return result;
   }
 

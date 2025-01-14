@@ -11,7 +11,7 @@
 using namespace amos;
 
 int main() {
-  int k = 6;
+  int k = 7;
 
   auto start = std::chrono::high_resolution_clock::now();
 
@@ -24,8 +24,9 @@ int main() {
   // Print the time taken to create the cache
   std::cout << "Time to create AMO Cache: " << duration.count() << " ms\n";
 
-  u_int16_t upper_triangle = 0b110010;
+  u_int16_t upper_triangle = 0b110111;
 
+  k = 4;
   AmoList amos = cache.get_amos(k, upper_triangle);
 
   std::vector<std::vector<int>> decoded_permutations;
